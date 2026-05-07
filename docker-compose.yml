@@ -1,0 +1,8 @@
+services:
+  swish:
+    image: swipl/swish
+    container_name: labirinto-swish
+    ports:
+      - 3050:3050
+    volumes:
+      - .:/data
