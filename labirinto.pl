@@ -7,95 +7,69 @@ porta(ponte_troll, saida).
 porta(entrada, corredor_fogo). % Na entrada são duas opções de sala
 porta(corredor_fogo, saida).
 
-
 % ==========================================================
-% INTERFACE VISUAL DO LABIRINTO
+% INTERFACE VISUAL DO LABIRINTO (Seus desenhos originais)
 % ==========================================================
 
 mostrarMapa(entrada) :-
-    nl,
-    write('================ LABIRINTO ================'), nl,
-    write('                                            '), nl,
+    nl, write('================ LABIRINTO ================'), nl,
     write('               [CAVERNA] -- [TROLL] -- [SAIDA]'), nl,
     write('                    |                        '), nl,
     write('                 [ARMAS]                    '), nl,
     write('                    |                        '), nl,
     write(' @ -> [ENTRADA] -- [FOGO] -----> [SAIDA]   '), nl,
-    write('                                            '), nl,
-    write('============================================'), nl,
-    nl.
+    write('============================================'), nl, nl.
 
 mostrarMapa(sala_armas) :-
-    nl,
-    write('================ LABIRINTO ================'), nl,
-    write('                                            '), nl,
+    nl, write('================ LABIRINTO ================'), nl,
     write('               [CAVERNA] -- [TROLL] -- [SAIDA]'), nl,
     write('                    |                        '), nl,
     write('               @ -> [ARMAS]                '), nl,
     write('                    |                        '), nl,
     write('            [ENTRADA] -- [FOGO] -----> [SAIDA]'), nl,
-    write('                                            '), nl,
-    write('============================================'), nl,
-    nl.
+    write('============================================'), nl, nl.
 
 mostrarMapa(caverna_escura) :-
-    nl,
-    write('================ LABIRINTO ================'), nl,
-    write('                                            '), nl,
+    nl, write('================ LABIRINTO ================'), nl,
     write('          @ -> [CAVERNA] -- [TROLL] -- [SAIDA]'), nl,
     write('                    |                        '), nl,
     write('                 [ARMAS]                    '), nl,
     write('                    |                        '), nl,
     write('            [ENTRADA] -- [FOGO] -----> [SAIDA]'), nl,
-    write('                                            '), nl,
-    write('============================================'), nl,
-    nl.
+    write('============================================'), nl, nl.
 
 mostrarMapa(ponte_troll) :-
-    nl,
-    write('================ LABIRINTO ================'), nl,
-    write('                                            '), nl,
+    nl, write('================ LABIRINTO ================'), nl,
     write('         [CAVERNA] -- @ [TROLL] -- [SAIDA]'), nl,
     write('                    |                        '), nl,
     write('                 [ARMAS]                    '), nl,
     write('                    |                        '), nl,
     write('            [ENTRADA] -- [FOGO] -----> [SAIDA]'), nl,
-    write('                                            '), nl,
-    write('============================================'), nl,
-    nl.
+    write('============================================'), nl, nl.
 
 mostrarMapa(corredor_fogo) :-
-    nl,
-    write('================ LABIRINTO ================'), nl,
-    write('                                            '), nl,
+    nl, write('================ LABIRINTO ================'), nl,
     write('         [CAVERNA] -- [TROLL] -- [SAIDA]   '), nl,
     write('                    |                        '), nl,
     write('                 [ARMAS]                    '), nl,
     write('                    |                        '), nl,
     write('         [ENTRADA] -- @ [FOGO] -----> [SAIDA]'), nl,
-    write('                                            '), nl,
-    write('============================================'), nl,
-    nl.
+    write('============================================'), nl, nl.
 
 mostrarMapa(saida) :-
-    nl,
-    write('================ LABIRINTO ================'), nl,
-    write('                                            '), nl,
+    nl, write('================ LABIRINTO ================'), nl,
     write('         [CAVERNA] -- [TROLL] -- [SAIDA]   '), nl,
     write('                    |                        '), nl,
     write('                 [ARMAS]                    '), nl,
     write('                    |                        '), nl,
     write('         [ENTRADA] -- [FOGO] -----> @ SAIDA'), nl,
-    write('                                            '), nl,
-    write('============================================'), nl,
-    nl.
+    write('============================================'), nl, nl.
 
-
-% O mapa é bidirecional, pode ir e voltar
+% O mapa é bidirecional
 conectado(X, Y) :- porta(X, Y).
 conectado(X, Y) :- porta(Y, X).
 
-% Monstros nas salas e o que os derrota
+% Monstros e fraquezas
 obstaculo(caverna_escura, morcegos).
 obstaculo(ponte_troll, troll).
 obstaculo(corredor_fogo, dragao).
@@ -103,111 +77,53 @@ obstaculo(corredor_fogo, dragao).
 derrota(tocha, morcegos).
 derrota(espada, troll).
 derrota(pocao_agua, dragao).
+derrota(escudo, nada). % Sua arma inútil (estilo "magikarp")
 
-% Passa direto se a sala não tiver nenhum obstáculo
-sobrevive(Sala, _) :- 
-    \+ obstaculo(Sala, _).
-
-% Passa se tiver no inventário o item que derrota o monstro
+% Regras de sobrevivência
+sobrevive(Sala, _) :- \+ obstaculo(Sala, _).
 sobrevive(Sala, Inventario) :-
-
     obstaculo(Sala, Monstro),
-
-    write('Monstro encontrado: '),
-    write(Monstro), nl,
-
     derrota(Item, Monstro),
-
     member(Item, Inventario),
+    format('Monstro encontrado: ~w! Usando ~w para derrota-lo!~n', [Monstro, Item]).
 
-    write('Usando item: '),
-    write(Item), nl,
-
-    write('Monstro derrotado!'), nl.
-
-
-% Caso base da recursão:
-% Se a sala atual for igual ao destino,
-% significa que o caminho foi encontrado.
-% Nesse momento:
-% - adiciona o destino na rota atual
-% - inverte a lista (porque ela foi montada ao contrário)
-% - gera a rota final correta
+% Caso base: Fim da jornada
 escapar(Destino, Destino, _, RotaAtual, RotaFinal) :-
-
-    nl,
-    write('===================================='), nl,
+    nl, write('===================================='), nl,
     write('VOCE ENCONTROU A SAIDA DA MASMORRA!'), nl,
     write('===================================='), nl,
-
     mostrarMapa(Destino),
-
-    write('Cheguei no destino: '),
-    write(Destino), nl,
-
     reverse([Destino|RotaAtual], RotaFinal),
+    format('Rota final: ~w~n', [RotaFinal]).
 
-    write('Rota final encontrada: '),
-    write(RotaFinal), nl,
-    nl.
-
-
-% Regra recursiva
+% Regra recursiva corrigida com LOG DE DECISAO
 escapar(Atual, Destino, Inventario, RotaAtual, RotaFinal) :-
-
+    Atual \== Destino,
     mostrarMapa(Atual),
-
-    write('Estou na sala: '),
-    write(Atual), nl,
-
-    write('Inventario atual: '),
-    write(Inventario), nl,
-
-    write('Rota percorrida ate agora: '),
-    write(RotaAtual), nl, nl,
-
+    format('Estou em: ~w | Inventario: ~w~n', [Atual, Inventario]),
+    
     conectado(Atual, ProximaSala),
-
-    write('Tentando ir para: '),
-    write(ProximaSala), nl,
-
     \+ member(ProximaSala, RotaAtual),
+    
+    write('Tentando caminho por: '), write(ProximaSala), write('... '), 
 
-    write('Sala ainda nao visitada'), nl,
-
-    sobrevive(ProximaSala, Inventario),
-
-    write('Sobreviveu na sala: '),
-    write(ProximaSala), nl,
-
-    write('Continuando exploracao...'), nl, nl,
-
-    escapar(
-        ProximaSala,
-        Destino,
-        Inventario,
-        [Atual|RotaAtual],
-        RotaFinal
+    (sobrevive(ProximaSala, Inventario) -> 
+        (
+            write('Sucesso! Entrando em '), write(ProximaSala), nl,
+            escapar(ProximaSala, Destino, Inventario, [Atual|RotaAtual], RotaFinal)
+        )
+        ;
+        (
+            write('PERIGO! Nao tenho o item para '), write(ProximaSala), nl,
+            write('>> Backtracking: Voltando para '), write(Atual), write(' para buscar outra rota...'), nl,
+            fail 
+        )
     ).
 
-% Facilidade para testar rapidamente
-% Para na primeira rota válida encontrada
-jogar(Inventario, RotaQueFuncionou) :-
-
-    nl,
-    write('===================================='), nl,
-    write('INICIANDO EXPLORACAO DA MASMORRA...'), nl,
-    write('===================================='), nl,
-
-    write('Inventario inicial: '),
-    write(Inventario), nl, nl,
-
-    once(
-        escapar(
-            entrada,
-            saida,
-            Inventario,
-            [],
-            RotaQueFuncionou
-        )
+% Predicado principal
+jogar(Inventario) :-
+    nl, write('--- INICIANDO EXPLORACAO ---'), nl,
+    (once(escapar(entrada, saida, Inventario, [], _)) -> 
+        true ; 
+        (nl, write('GAME OVER: Voce ficou preso no labirinto!'), nl)
     ).
