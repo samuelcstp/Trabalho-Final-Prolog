@@ -77,7 +77,7 @@ obstaculo(corredor_fogo, dragao).
 derrota(tocha, morcegos).
 derrota(espada, troll).
 derrota(pocao_agua, dragao).
-derrota(escudo, nada). % Sua arma inútil (estilo "magikarp")
+derrota(escudo, nada).
 
 % Regras de sobrevivência
 sobrevive(Sala, _) :- \+ obstaculo(Sala, _).
